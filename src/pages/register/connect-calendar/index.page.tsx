@@ -3,9 +3,14 @@ import { ArrowRight } from 'phosphor-react'
 import { Container, Header } from '../styles'
 import { Button, Heading, MultiStep, Text } from '@ignite-ui/react'
 import { ConnectBox, ConnectItem } from './styles'
+import { signIn, useSession } from 'next-auth/react'
 
 export default function Register() {
   // async function handleRegister(data: RegisterFormData) {}
+
+  const session = useSession()
+
+  console.log(session.data)
 
   return (
     <Container>
@@ -27,6 +32,7 @@ export default function Register() {
           <Button
             variant='secondary'
             size='sm'
+            onClick={() => signIn('google')}
           >
             Conectar
             <ArrowRight />
