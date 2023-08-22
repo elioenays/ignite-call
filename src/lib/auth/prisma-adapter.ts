@@ -20,9 +20,9 @@ export function PrismaAdapter(
           id: userIdOnCookies,
         },
         data: {
-          name: user.name,
+          name: user.name!,
           email: user.email,
-          avatar_url: user.image,
+          avatar_url: user.avatar_url,
         },
       })
 
@@ -74,9 +74,9 @@ export function PrismaAdapter(
     async getUserByAccount({ providerAccountId, provider }) {
       const account = await prisma.account.findUnique({
         where: {
-          provider_provider_account_Id: {
+          provider_provider_account_id: {
             provider,
-            provider_account_Id: providerAccountId,
+            provider_account_id: providerAccountId,
           },
         },
         include: { user: true },
@@ -120,10 +120,10 @@ export function PrismaAdapter(
     async linkAccount(account) {
       await prisma.account.create({
         data: {
-          user_Id: account.userId,
+          user_id: account.userId,
           type: account.type,
           provider: account.provider,
-          provider_account_Id: account.providerAccountId,
+          provider_account_id: account.providerAccountId,
           refresh_token: account.refresh_token,
           access_token: account.access_token,
           expires_at: account.expires_at,
