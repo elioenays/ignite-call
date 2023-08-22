@@ -4,9 +4,7 @@ import { Container, Header } from '../styles'
 import { Button, Heading, MultiStep, Text } from '@ignite-ui/react'
 import { ConnectBox, ConnectItem } from './styles'
 
-export default function Register() {
-  // async function handleRegister(data: RegisterFormData) {}
-
+export default function ConnectCalendar() {
   return (
     <Container>
       <Header>
