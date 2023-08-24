@@ -1,5 +1,4 @@
 import React from 'react'
-import CalendarStep from '../CalendarStep'
 import { ConfirmForm, FormActions, FormError, FormHeader } from './styles'
 import { Button, Text, TextArea, TextInput } from '@ignite-ui/react'
 import { CalendarBlank, Clock } from 'phosphor-react'
