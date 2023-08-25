@@ -1,7 +1,7 @@
 import { Heading, Text } from '@ignite-ui/react'
 import { Hero, HomeContainer, Preview } from './styles'
 
-import previewImg from '../../assets/app-preview.png'
+import previewImg from '@/assets/app-preview.png'
 import Image from 'next/image'
 import ClaimUsernameForm from './ClaimUsernameForm'
 

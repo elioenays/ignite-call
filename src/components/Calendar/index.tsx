@@ -3,8 +3,7 @@ import dayjs from 'dayjs'
 import { useRouter } from 'next/router'
 import { CaretLeft, CaretRight } from 'phosphor-react'
 import { useMemo, useState } from 'react'
-import { api } from '../../lib/axios'
-import { getWeekDays } from '../../utils/get-week-days'
+
 import {
   CalendarActions,
   CalendarBody,
@@ -13,6 +12,8 @@ import {
   CalendarHeader,
   CalendarTitle,
 } from './styles'
+import { getWeekDays } from '@/utils/get-week-days'
+import { api } from '@/lib/axios'
 
 interface CalendarWeek {
   week: number
