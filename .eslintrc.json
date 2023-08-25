@@ -16,6 +16,7 @@
         "printWidth": 80,
         "tabWidth": 2
       }
-    ]
+    ],
+    "camelcase": "off"
   }
 }
