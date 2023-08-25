@@ -1,13 +1,12 @@
-import React from 'react'
-import { ConfirmForm, FormActions, FormError, FormHeader } from './styles'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { Button, Text, TextArea, TextInput } from '@ignite-ui/react'
 import { CalendarBlank, Clock } from 'phosphor-react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { ConfirmForm, FormActions, FormError, FormHeader } from './styles'
 
 const confirmFormSchema = z.object({
-  name: z.string().min(3, { message: 'O nome precisa de mínimo 3 caracteres' }),
+  name: z.string().min(3, { message: 'O nome precisa no mínimo 3 caracteres' }),
   email: z.string().email({ message: 'Digite um e-mail válido' }),
   observations: z.string().nullable(),
 })
@@ -16,14 +15,14 @@ type ConfirmFormData = z.infer<typeof confirmFormSchema>
 
 export default function ConfirmStep() {
   const {
-    handleSubmit,
     register,
+    handleSubmit,
     formState: { isSubmitting, errors },
   } = useForm<ConfirmFormData>({
     resolver: zodResolver(confirmFormSchema),
   })
 
-  async function handleConfirmScheduling(data: ConfirmFormData) {
+  function handleConfirmScheduling(data: ConfirmFormData) {
     console.log(data)
   }
 
@@ -35,18 +34,19 @@ export default function ConfirmStep() {
       <FormHeader>
         <Text>
           <CalendarBlank />
-          22 de setembro de 2023
+          22 de Setembro de 2022
         </Text>
         <Text>
           <Clock />
-          15:00h
+          18:00h
         </Text>
       </FormHeader>
+
       <label>
         <Text size='sm'>Nome completo</Text>
         <TextInput
-          placeholder='Seu nome'
           crossOrigin=''
+          placeholder='Seu nome'
           {...register('name')}
         />
         {errors.name && <FormError size='sm'>{errors.name.message}</FormError>}
@@ -55,9 +55,9 @@ export default function ConfirmStep() {
       <label>
         <Text size='sm'>Endereço de e-mail</Text>
         <TextInput
-          placeholder='jhondoe@example.com'
-          type='email'
           crossOrigin=''
+          type='email'
+          placeholder='johndoe@example.com'
           {...register('email')}
         />
         {errors.email && (

@@ -1,10 +1,10 @@
 version: '3'
 services:
   database:
-    image: bitnami/postgresql
+    image: bitnami/mysql:latest
     ports:
-      - 5432:5432/tcp
+      - 3306:3306/tcp
     environment:
-      - POSTGRESQL_USERNAME=postgres
-      - POSTGRESQL_PASSWORD=password
-      - POSTGRESQL_DATABASE=ignite_call
+      - MYSQL_ROOT_USER=root
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=ignite_call
