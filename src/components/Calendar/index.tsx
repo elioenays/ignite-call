@@ -1,4 +1,9 @@
-import { getWeekDays } from '@/utils/get-week-days'
+import { useQuery } from '@tanstack/react-query'
+import dayjs from 'dayjs'
+import { useRouter } from 'next/router'
+import { CaretLeft, CaretRight } from 'phosphor-react'
+import { useMemo, useState } from 'react'
+
 import {
   CalendarActions,
   CalendarBody,
@@ -7,59 +12,88 @@ import {
   CalendarHeader,
   CalendarTitle,
 } from './styles'
-import { CaretLeft, CaretRight } from 'phosphor-react'
-import { useMemo, useState } from 'react'
-import dayjs from 'dayjs'
+import { getWeekDays } from '@/utils/get-week-days'
+import { api } from '@/lib/axios'
 
 interface CalendarWeek {
   week: number
-  days: Array<{ date: dayjs.Dayjs; disabled: boolean }>
-}
-
-interface CalendarProps {
-  selectedDate?: Date | null
-  onDateSelected: (date: Date) => void
+  days: Array<{
+    date: dayjs.Dayjs
+    disabled: boolean
+  }>
 }
 
 type CalendarWeeks = CalendarWeek[]
 
-export default function Calendar({
-  onDateSelected,
-  selectedDate,
-}: CalendarProps) {
+interface BlockedDates {
+  blockedWeekDays: number[]
+  blockedDates: number[]
+}
+
+interface CalendarProps {
+  selectedDate: Date | null
+  onDateSelected: (date: Date) => void
+}
+
+export default function Calendar({ onDateSelected }: CalendarProps) {
   const [currentDate, setCurrentDate] = useState(() => {
     return dayjs().set('date', 1)
   })
 
-  function handlePreviousMonth() {
-    const previousMonthDate = currentDate.subtract(1, 'month')
+  const router = useRouter()
 
-    setCurrentDate(previousMonthDate)
+  function handlePreviousMonth() {
+    const previousMonth = currentDate.subtract(1, 'month')
+
+    setCurrentDate(previousMonth)
   }
 
   function handleNextMonth() {
-    const previousMonthDate = currentDate.add(1, 'month')
+    const nextMonth = currentDate.add(1, 'month')
 
-    setCurrentDate(previousMonthDate)
+    setCurrentDate(nextMonth)
   }
 
-  const weekDays = getWeekDays({ short: true })
+  const shortWeekDays = getWeekDays({ short: true })
 
   const currentMonth = currentDate.format('MMMM')
   const currentYear = currentDate.format('YYYY')
 
+  const username = String(router.query.username)
+
+  const { data: blockedDates } = useQuery<BlockedDates>(
+    ['blocked-dates', currentDate.get('year'), currentDate.get('month')],
+    async () => {
+      const response = await api.get(`/users/${username}/blocked-dates`, {
+        params: {
+          year: currentDate.get('year'),
+          month: currentDate.get('month') + 1,
+        },
+      })
+
+      return response.data
+    },
+  )
+
   const calendarWeeks = useMemo(() => {
+    if (!blockedDates) {
+      return []
+    }
+    console.log('calendarWeeks ~ blockedDates', blockedDates)
+
     const daysInMonthArray = Array.from({
       length: currentDate.daysInMonth(),
-    }).map((_, index) => {
-      return currentDate.set('date', index + 1)
+    }).map((_, i) => {
+      return currentDate.set('date', i + 1)
     })
 
     const firstWeekDay = currentDate.get('day')
 
-    const previousMonthFilldArray = Array.from({ length: firstWeekDay })
-      .map((_, index) => {
-        return currentDate.subtract(index + 1, 'day')
+    const previousMonthFillArray = Array.from({
+      length: firstWeekDay,
+    })
+      .map((_, i) => {
+        return currentDate.subtract(i + 1, 'day')
       })
       .reverse()
 
@@ -67,21 +101,26 @@ export default function Calendar({
       'date',
       currentDate.daysInMonth(),
     )
-
     const lastWeekDay = lastDayInCurrentMonth.get('day')
 
-    const nextMonthFillArray = Array.from({ length: 7 - lastWeekDay + 1 }).map(
-      (_, index) => {
-        return lastDayInCurrentMonth.add(index + 1, 'day')
-      },
-    )
+    const nextMonthFillArray = Array.from({
+      length: 7 - (lastWeekDay + 1),
+    }).map((_, i) => {
+      return lastDayInCurrentMonth.add(i + 1, 'day')
+    })
 
     const calendarDays = [
-      ...previousMonthFilldArray.map((date) => {
+      ...previousMonthFillArray.map((date) => {
         return { date, disabled: true }
       }),
       ...daysInMonthArray.map((date) => {
-        return { date, disabled: date.endOf('day').isBefore(new Date()) }
+        return {
+          date,
+          disabled:
+            date.endOf('day').isBefore(new Date()) ||
+            blockedDates.blockedWeekDays.includes(date.get('day')) ||
+            blockedDates.blockedDates.includes(date.get('date')),
+        }
       }),
       ...nextMonthFillArray.map((date) => {
         return { date, disabled: true }
@@ -93,7 +132,10 @@ export default function Calendar({
         const isNewWeek = i % 7 === 0
 
         if (isNewWeek) {
-          weeks.push({ week: i / 7 + 1, days: original.slice(i, i + 7) })
+          weeks.push({
+            week: i / 7 + 1,
+            days: original.slice(i, i + 7),
+          })
         }
 
         return weeks
@@ -102,7 +144,7 @@ export default function Calendar({
     )
 
     return calendarWeeks
-  }, [currentDate])
+  }, [currentDate, blockedDates])
 
   return (
     <CalendarContainer>
@@ -110,6 +152,7 @@ export default function Calendar({
         <CalendarTitle>
           {currentMonth} <span>{currentYear}</span>
         </CalendarTitle>
+
         <CalendarActions>
           <button
             onClick={handlePreviousMonth}
@@ -117,7 +160,6 @@ export default function Calendar({
           >
             <CaretLeft />
           </button>
-
           <button
             onClick={handleNextMonth}
             title='Next month'
@@ -126,12 +168,13 @@ export default function Calendar({
           </button>
         </CalendarActions>
       </CalendarHeader>
+
       <CalendarBody>
         <thead>
           <tr>
-            {weekDays.map((weekday) => {
-              return <th key={weekday}>{weekday}.</th>
-            })}
+            {shortWeekDays.map((weekDay) => (
+              <th key={weekDay}>{weekDay}.</th>
+            ))}
           </tr>
         </thead>
         <tbody>
