@@ -20,7 +20,7 @@ export default function Home() {
             as='h1'
             size='4xl'
           >
-            Agendament descomplicado
+            Agendamento descomplicado
           </Heading>
           <Text size='lg'>
             Conecte seu calendário e permita que as pessoas marquem agendamentos
